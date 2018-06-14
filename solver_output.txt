@@ -1,0 +1,123 @@
+max_count = 100
+for count in range(max_count):
+# for lr in learning_rates: 
+#     for reg in regularization_strengths:
+    reg = 10**uniform(-5,5)
+    lr = 10**uniform(-3,-6)
+    D, H, C = 3072, 50, 10
+    std = 1e-3
+    model = TwoLayerNet(input_dim=D, hidden_dim=H, num_classes=C, weight_scale=std, reg=reg)
+    # solver only uses 1000 training examples by default?
+    solver = Solver(model, data,
+                    update_rule='sgd',
+                    optim_config={
+                      'learning_rate': lr,
+                    },
+                    lr_decay=0.95,
+                    num_epochs=500, batch_size=100,
+                    print_every=10,
+                    verbose=False)
+
+
+
+lr 7.239992e-06 reg 1.763966e-03 train accuracy: 0.220000 val accuracy: 0.117000
+lr 6.766557e-05 reg 1.329424e+04 train accuracy: 0.160000 val accuracy: 0.112000
+lr 2.693257e-05 reg 3.452563e+04 train accuracy: 0.160000 val accuracy: 0.140000
+lr 2.416836e-04 reg 3.873293e+04 train accuracy: 0.160000 val accuracy: 0.120000
+lr 1.177036e-05 reg 1.390077e+04 train accuracy: 0.200000 val accuracy: 0.111000
+lr 1.096278e-04 reg 5.656588e+03 train accuracy: 0.160000 val accuracy: 0.130000
+lr 1.341876e-05 reg 4.852865e+01 train accuracy: 0.100000 val accuracy: 0.128000
+lr 1.988984e-06 reg 2.928121e-04 train accuracy: 0.080000 val accuracy: 0.099000
+lr 1.891706e-06 reg 1.703621e-01 train accuracy: 0.060000 val accuracy: 0.080000
+lr 2.515285e-06 reg 4.601974e-04 train accuracy: 0.140000 val accuracy: 0.113000
+lr 1.108154e-05 reg 2.057512e+04 train accuracy: 0.160000 val accuracy: 0.086000
+lr 3.414537e-05 reg 4.916930e+02 train accuracy: 0.240000 val accuracy: 0.128000
+lr 1.886603e-06 reg 7.698487e-03 train accuracy: 0.060000 val accuracy: 0.118000
+lr 3.188181e-05 reg 6.173116e+03 train accuracy: 0.160000 val accuracy: 0.118000
+lr 1.617641e-05 reg 7.610684e-05 train accuracy: 0.140000 val accuracy: 0.089000
+lr 5.489547e-06 reg 5.725667e+01 train accuracy: 0.080000 val accuracy: 0.088000
+lr 5.760768e-06 reg 1.357283e-02 train accuracy: 0.120000 val accuracy: 0.091000
+lr 9.492575e-04 reg 9.229309e+02 train accuracy: 0.160000 val accuracy: 0.185000
+lr 1.020371e-05 reg 3.334229e-01 train accuracy: 0.120000 val accuracy: 0.075000
+lr 3.545217e-05 reg 1.888145e-05 train accuracy: 0.240000 val accuracy: 0.125000
+lr 8.341381e-04 reg 8.371750e+02 train accuracy: 0.160000 val accuracy: 0.162000
+lr 5.435856e-06 reg 1.460213e+02 train accuracy: 0.120000 val accuracy: 0.100000
+lr 4.712405e-05 reg 2.578824e+00 train accuracy: 0.160000 val accuracy: 0.116000
+lr 8.688143e-04 reg 4.514801e-02 train accuracy: 0.580000 val accuracy: 0.202000
+lr 3.244593e-05 reg 9.573529e+00 train accuracy: 0.260000 val accuracy: 0.140000
+lr 5.588564e-06 reg 5.512820e-02 train accuracy: 0.100000 val accuracy: 0.098000
+lr 7.159263e-05 reg 2.313085e+04 train accuracy: 0.160000 val accuracy: 0.112000
+lr 1.265232e-05 reg 1.670565e-02 train accuracy: 0.140000 val accuracy: 0.065000
+lr 2.670730e-04 reg 1.853764e-01 train accuracy: 0.460000 val accuracy: 0.159000
+lr 5.650690e-04 reg 3.156339e-03 train accuracy: 0.420000 val accuracy: 0.164000
+lr 4.058095e-05 reg 3.654107e-03 train accuracy: 0.180000 val accuracy: 0.134000
+lr 3.385953e-06 reg 4.498241e+03 train accuracy: 0.100000 val accuracy: 0.113000
+lr 2.142089e-05 reg 2.923453e-02 train accuracy: 0.140000 val accuracy: 0.154000
+lr 2.143156e-05 reg 1.870156e-01 train accuracy: 0.180000 val accuracy: 0.104000
+lr 3.400088e-04 reg 1.417237e+03 train accuracy: 0.160000 val accuracy: 0.144000
+lr 6.976603e-04 reg 3.652750e-04 train accuracy: 0.500000 val accuracy: 0.186000
+lr 7.278145e-06 reg 9.946617e+04 train accuracy: 0.160000 val accuracy: 0.112000
+lr 2.909879e-05 reg 2.693308e-03 train accuracy: 0.140000 val accuracy: 0.087000
+lr 1.390809e-06 reg 3.584949e+02 train accuracy: 0.200000 val accuracy: 0.126000
+lr 2.139594e-05 reg 5.511626e-01 train accuracy: 0.160000 val accuracy: 0.147000
+lr 7.397729e-05 reg 3.856460e+01 train accuracy: 0.320000 val accuracy: 0.102000
+lr 1.440075e-05 reg 4.348573e+02 train accuracy: 0.080000 val accuracy: 0.092000
+lr 6.922890e-06 reg 1.126593e-04 train accuracy: 0.180000 val accuracy: 0.097000
+lr 1.087125e-04 reg 1.431496e+00 train accuracy: 0.460000 val accuracy: 0.141000
+lr 2.696561e-05 reg 1.142168e-04 train accuracy: 0.160000 val accuracy: 0.133000
+lr 5.457286e-05 reg 6.768013e+00 train accuracy: 0.300000 val accuracy: 0.139000
+lr 5.888780e-05 reg 1.583907e-05 train accuracy: 0.180000 val accuracy: 0.132000
+lr 2.437041e-06 reg 2.643134e-05 train accuracy: 0.080000 val accuracy: 0.087000
+lr 6.212389e-04 reg 2.922226e+04 train accuracy: 0.100000 val accuracy: 0.125000
+lr 7.841390e-05 reg 1.857051e+01 train accuracy: 0.360000 val accuracy: 0.149000
+lr 4.311904e-06 reg 8.144660e+00 train accuracy: 0.060000 val accuracy: 0.088000
+lr 1.095036e-04 reg 1.815679e+02 train accuracy: 0.440000 val accuracy: 0.164000
+lr 8.715708e-05 reg 2.141446e+04 train accuracy: 0.160000 val accuracy: 0.116000
+lr 7.122651e-05 reg 1.192305e-02 train accuracy: 0.380000 val accuracy: 0.134000
+lr 5.929782e-04 reg 1.046594e-03 train accuracy: 0.380000 val accuracy: 0.162000
+lr 1.763669e-04 reg 2.957158e+04 train accuracy: 0.160000 val accuracy: 0.112000
+lr 1.832996e-04 reg 2.916022e+02 train accuracy: 0.400000 val accuracy: 0.139000
+lr 7.257201e-04 reg 2.749273e-02 train accuracy: 0.620000 val accuracy: 0.168000
+lr 4.928170e-05 reg 4.666960e+03 train accuracy: 0.180000 val accuracy: 0.140000
+lr 1.767408e-06 reg 6.171922e+04 train accuracy: 0.060000 val accuracy: 0.095000
+lr 6.810256e-06 reg 9.939990e-03 train accuracy: 0.160000 val accuracy: 0.111000
+lr 2.114507e-05 reg 6.487688e-05 train accuracy: 0.220000 val accuracy: 0.108000
+lr 1.381697e-04 reg 8.613255e-03 train accuracy: 0.420000 val accuracy: 0.164000
+lr 1.243100e-04 reg 4.521465e-03 train accuracy: 0.400000 val accuracy: 0.117000
+lr 9.061874e-06 reg 8.529837e+04 train accuracy: 0.160000 val accuracy: 0.081000
+lr 4.337444e-05 reg 4.903186e+02 train accuracy: 0.280000 val accuracy: 0.116000
+lr 7.959542e-04 reg 3.434756e-04 train accuracy: 0.660000 val accuracy: 0.182000
+lr 9.147811e-04 reg 6.338956e-02 train accuracy: 0.640000 val accuracy: 0.185000
+lr 1.401408e-05 reg 2.006265e+03 train accuracy: 0.160000 val accuracy: 0.124000
+lr 1.586445e-04 reg 4.130663e+01 train accuracy: 0.460000 val accuracy: 0.161000
+lr 2.193344e-04 reg 4.826196e+00 train accuracy: 0.580000 val accuracy: 0.162000
+lr 1.969786e-06 reg 1.001389e-02 train accuracy: 0.140000 val accuracy: 0.112000
+lr 1.068498e-06 reg 2.796238e-01 train accuracy: 0.060000 val accuracy: 0.114000
+lr 3.841338e-05 reg 3.042091e+00 train accuracy: 0.240000 val accuracy: 0.126000
+lr 1.554811e-05 reg 6.415930e+00 train accuracy: 0.100000 val accuracy: 0.105000
+lr 7.937170e-06 reg 1.377464e+04 train accuracy: 0.120000 val accuracy: 0.106000
+lr 6.151186e-04 reg 5.809953e+02 train accuracy: 0.160000 val accuracy: 0.139000
+lr 2.115933e-04 reg 1.659064e-05 train accuracy: 0.480000 val accuracy: 0.157000
+lr 6.755894e-04 reg 1.356499e+02 train accuracy: 0.360000 val accuracy: 0.165000
+lr 4.755733e-05 reg 8.202600e-01 train accuracy: 0.280000 val accuracy: 0.137000
+lr 7.756051e-06 reg 1.004124e-04 train accuracy: 0.100000 val accuracy: 0.127000
+lr 1.133709e-04 reg 5.087814e+00 train accuracy: 0.480000 val accuracy: 0.144000
+lr 2.550271e-05 reg 3.227786e-05 train accuracy: 0.160000 val accuracy: 0.102000
+lr 3.399438e-04 reg 1.469997e-01 train accuracy: 0.420000 val accuracy: 0.182000
+lr 2.758156e-06 reg 6.885906e+02 train accuracy: 0.120000 val accuracy: 0.107000
+lr 1.899536e-04 reg 2.702957e+03 train accuracy: 0.160000 val accuracy: 0.143000
+lr 2.210612e-04 reg 1.329857e+04 train accuracy: 0.160000 val accuracy: 0.112000
+lr 4.310765e-05 reg 7.193000e+00 train accuracy: 0.320000 val accuracy: 0.118000
+lr 8.094466e-04 reg 7.817165e-04 train accuracy: 0.540000 val accuracy: 0.177000
+lr 2.775621e-05 reg 1.052763e+02 train accuracy: 0.140000 val accuracy: 0.113000
+lr 6.951424e-06 reg 2.483948e+01 train accuracy: 0.120000 val accuracy: 0.096000
+lr 1.282599e-06 reg 1.552708e+03 train accuracy: 0.080000 val accuracy: 0.095000
+lr 1.368438e-06 reg 3.337047e+04 train accuracy: 0.200000 val accuracy: 0.147000
+lr 1.185589e-04 reg 3.289082e+00 train accuracy: 0.240000 val accuracy: 0.139000
+lr 2.507021e-06 reg 3.795489e+00 train accuracy: 0.120000 val accuracy: 0.095000
+lr 4.364998e-04 reg 3.697431e+01 train accuracy: 0.460000 val accuracy: 0.181000
+lr 3.542713e-06 reg 2.925755e+04 train accuracy: 0.060000 val accuracy: 0.086000
+lr 1.035070e-05 reg 1.785191e-02 train accuracy: 0.100000 val accuracy: 0.091000
+lr 7.452235e-06 reg 3.633040e-01 train accuracy: 0.100000 val accuracy: 0.109000
+lr 5.878665e-06 reg 3.182031e+00 train accuracy: 0.100000 val accuracy: 0.124000
+best validation accuracy achieved during cross-validation: 0.202000
