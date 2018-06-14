@@ -104,8 +104,8 @@ class TwoLayerNet(object):
         loss, dout = softmax_loss(scores, y)
         x2, grads['W2'], grads['b2'] = affine_backward(dout, affine_forward_cache)
         x1, grads['W1'], grads['b1'] = affine_relu_backward(x2, affine_relu_forward_cache)
-        grads['W1'] += self.reg * 2.0 * np.sum(self.params['W1'])
-        grads['W2'] += self.reg * 2.0 * np.sum(self.params['W2'])
+        grads['W1'] += self.reg * self.params['W1']
+        grads['W2'] += self.reg * self.params['W2']
 #         import pdb; pdb.set_trace()
         loss += self.reg * 0.5 * (np.sum(self.params['W1']**2) + np.sum(self.params['W2']**2))
         ############################################################################
