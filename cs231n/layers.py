@@ -167,7 +167,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     running_mean = bn_param.get('running_mean', np.zeros(D, dtype=x.dtype))
     running_var = bn_param.get('running_var', np.zeros(D, dtype=x.dtype))
 
-    out, cache = None, None
+    out, cache = None, {}
     if mode == 'train':
         #######################################################################
         # TODO: Implement the training-time forward pass for batch norm.      #
@@ -190,7 +190,30 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # Referencing the original paper (https://arxiv.org/abs/1502.03167)   #
         # might prove to be helpful.                                          #
         #######################################################################
-        pass
+        # 1) compute sample mean and sample variance
+        
+        sample_mean = np.average(x,axis=0) 
+        sample_var = np.var(x,axis=0)
+        
+        
+        # 2) normalise the data with sample mean and sample variance
+        
+        x -= sample_mean
+        x /= np.sqrt(sample_var)
+        cache['before_gamma'] = x
+        
+#         import pdb; pdb.set_trace()
+        
+        # 3) scale and shift the data with gamma and beta
+        
+        x *= gamma 
+        x += beta 
+        
+        out = x
+        
+        
+        running_mean = momentum * running_mean + (1 - momentum) * sample_mean
+        running_var = momentum * running_var + (1 - momentum) * sample_var
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -201,7 +224,20 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # then scale and shift the normalized data using gamma and beta.      #
         # Store the result in the out variable.                               #
         #######################################################################
-        pass
+        
+        # 1) normalise the data with sample mean and sample variance
+        
+        x -= running_mean
+        x /= np.sqrt(running_var)
+        
+#         import pdb; pdb.set_trace()
+        
+        # 2) scale and shift the data with gamma and beta
+        
+        x *= gamma 
+        x += beta 
+        
+        out = x
         #######################################################################
         #                          END OF YOUR CODE                           #
         #######################################################################
@@ -239,7 +275,10 @@ def batchnorm_backward(dout, cache):
     # Referencing the original paper (https://arxiv.org/abs/1502.03167)       #
     # might prove to be helpful.                                              #
     ###########################################################################
-    pass
+    dbeta = dout
+    dgamma = cache['before_gamma'] * dout
+    dx = dout
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################

@@ -101,7 +101,15 @@ def rmsprop(w, dw, config=None):
     # in the next_w variable. Don't forget to update cache value stored in    #
     # config['cache'].                                                        #
     ###########################################################################
-    pass
+    cache = config['cache']
+    decay_rate = config['decay_rate']
+    learning_rate = config['learning_rate']
+    eps = config['epsilon']
+
+    cache = decay_rate * cache + (1 - decay_rate) * dw**2
+    w += - learning_rate * dw / (np.sqrt(cache) + eps)
+    next_w = w
+    config['cache'] = cache
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -141,7 +149,27 @@ def adam(w, dw, config=None):
     # NOTE: In order to match the reference output, please modify t _before_  #
     # using it in any calculations.                                           #
     ###########################################################################
-    pass
+    # t is your iteration counter going from 1 to infinity
+    
+    beta1 = config['beta1']
+    beta2 = config['beta2']
+    learning_rate = config['learning_rate']
+    eps = config['epsilon']
+    m = config['m']
+    v = config['v']
+    t = config['t']
+    t+=1
+    
+    m = beta1*m + (1-beta1)*dw
+    mt = m / (1-beta1**t)
+    v = beta2*v + (1-beta2)*(dw**2)
+    vt = v / (1-beta2**t)
+    w += - learning_rate * mt / (np.sqrt(vt) + eps)
+    
+    next_w = w
+    config['m'] = m
+    config['v'] = v
+    config['t'] = t
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
