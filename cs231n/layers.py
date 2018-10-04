@@ -26,7 +26,9 @@ def affine_forward(x, w, b):
     # will need to reshape the input into rows.                               #
     ###########################################################################
     X = x.reshape((x.shape[0],w.shape[0])) # (N,D) = reshape((N, d_1, ..., d_k), N, D)
+    # ^^^ force individual training samples into a single vector 
     out = X.dot(w) + b # (N,M) = (N,D).dot(D,M)
+    # ^^^ dot multiply each sample with weight vector and add bias
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -168,6 +170,8 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     running_var = bn_param.get('running_var', np.zeros(D, dtype=x.dtype))
 
     out, cache = None, {}
+    sample_mean = np.average(x,axis=0) 
+    sample_var = np.var(x,axis=0)
     if mode == 'train':
         #######################################################################
         # TODO: Implement the training-time forward pass for batch norm.      #
@@ -190,28 +194,113 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # Referencing the original paper (https://arxiv.org/abs/1502.03167)   #
         # might prove to be helpful.                                          #
         #######################################################################
-        # 1) compute sample mean and sample variance
+#         N, D = x.shape
+
+#         #step1: calculate mean
+#         #mu = 1./N * np.sum(x, axis = 0)
+#         mu = np.average(x,axis=0)
+
+#         #step2: subtract mean vector of every trainings example
+#         xmu = x
+#         xmu -= mu
+
+#         #step3: following the lower branch - calculation denominator
+#         sq = xmu ** 2
+
+#         #step4: calculate variance
+#         #var = 1./N * np.sum(sq, axis = 0)
+#         var = np.var(x,axis=0)
+
+#         #step5: add eps for numerical stability, then sqrt
+#         sqrtvar = np.sqrt(var + eps)
+
+#         #step6: invert sqrtwar
+#         ivar = 1./sqrtvar
+
+#         #step7: execute normalization
+#         #xhat = xmu * ivar
+#         xhat = xmu
+#         xhat /= sqrtvar
+
+#         #step8: Nor the two transformation steps
+#         gammax = gamma * xhat
+
+#         #step9
+#         out = gammax + beta
+
+#         #store intermediate
+#         cache['solution'] = (xhat,gamma,xmu,ivar,sqrtvar,var,eps)
+
+        cache['eps'] = eps
+        N, D = x.shape
+        
+#         # 1) compute sample mean and sample variance
+#         #kratzert step1: calculate mean
+#         mu = 1./N * np.sum(x, axis = 0)
+        
+#         #kratzert step2: subtract mean vector of every trainings example
+#         xmu = x - mu
+
+#         #kratzert step3: following the lower branch - calculation denominator
+#         sq = xmu ** 2
+
+#         #kratzert step4: calculate variance
+#         var = 1./N * np.sum(sq, axis = 0)
         
         sample_mean = np.average(x,axis=0) 
         sample_var = np.var(x,axis=0)
         
+        #import pdb; pdb.set_trace()
+        # at this point the sample_mean === mu
+        # and sample_var === var
         
-        # 2) normalise the data with sample mean and sample variance
+        cache['sample_mean'] = sample_mean
+        cache['sample_var'] = sample_var
         
-        x -= sample_mean
-        x /= np.sqrt(sample_var)
-        cache['before_gamma'] = x
         
+#         # 2) normalise the data with sample mean and sample variance
+        
+#         #kratzert step5: add eps for numerical stability, then sqrt
+#         sqrtvar = np.sqrt(var + eps)
+
+#         #kratzert step6: invert sqrtwar
+#         ivar = 1./sqrtvar
+
+#         #kratzert step7: execute normalization
+#         xhat = xmu * ivar
+    
+        cache['x'] = x
+#         x -= sample_mean
+#         x /= np.sqrt(sample_var + eps)
+        x_centered = x - sample_mean
+        cache['x_centered'] = x_centered
+        x_normalized = x_centered / np.sqrt(sample_var + eps)
+        cache['norm_x'] = x_normalized
+        
+# #         import pdb; pdb.set_trace()
+        
+#         # 3) scale and shift the data with gamma and beta
+        
+#         #kratzert step8: Nor the two transformation steps
+#         gammax = gamma * xhat
+
+#         #kratzert step9
+#         out = gammax + beta
+        
+#         cache['kratzert'] = (xhat,gamma,xmu,ivar,sqrtvar,var,eps)
 #         import pdb; pdb.set_trace()
+        out = gamma * x_normalized + beta # problem was using x here ...
+#         x += beta 
         
-        # 3) scale and shift the data with gamma and beta
+        cache['gamma'] = gamma
+        cache['beta'] = beta
         
-        x *= gamma 
-        x += beta 
+#         out = x
         
-        out = x
+        # corresponds to alg 1 on page 3 of the paper
         
-        
+#         running_mean = momentum * running_mean + (1 - momentum) * mu # was sample_mean
+#         running_var = momentum * running_var + (1 - momentum) * var # was sample_var
         running_mean = momentum * running_mean + (1 - momentum) * sample_mean
         running_var = momentum * running_var + (1 - momentum) * sample_var
         #######################################################################
@@ -227,17 +316,17 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         
         # 1) normalise the data with sample mean and sample variance
         
-        x -= running_mean
-        x /= np.sqrt(running_var)
+#         x -= running_mean
+#         x /= np.sqrt(running_var)
+        
+        x_centered = x - sample_mean
+        x_normalized = x_centered / np.sqrt(sample_var + eps)
         
 #         import pdb; pdb.set_trace()
         
         # 2) scale and shift the data with gamma and beta
         
-        x *= gamma 
-        x += beta 
-        
-        out = x
+        out = gamma * x_normalized + beta 
         #######################################################################
         #                          END OF YOUR CODE                           #
         #######################################################################
@@ -260,7 +349,7 @@ def batchnorm_backward(dout, cache):
     intermediate nodes.
 
     Inputs:
-    - dout: Upstream derivatives, of shape (N, D)
+    - dout: Upstream derivatives, of shape (N, D) # (4,5)
     - cache: Variable of intermediates from batchnorm_forward.
 
     Returns a tuple of:
@@ -275,10 +364,122 @@ def batchnorm_backward(dout, cache):
     # Referencing the original paper (https://arxiv.org/abs/1502.03167)       #
     # might prove to be helpful.                                              #
     ###########################################################################
-    dbeta = dout
-    dgamma = cache['before_gamma'] * dout
-    dx = dout
+    norm_x = cache['norm_x']
+    gamma = cache['gamma']
+    beta = cache['beta'] 
+    eps = cache['eps'] 
+    sample_mean = cache['sample_mean']
+    sample_var = cache['sample_var']
+    x_centered = cache['x_centered']
     
+    #kratzert unfold the variables stored in cache
+#     xhat,gamma,xmu,ivar,sqrtvar,var,eps = cache['kratzert']
+    
+    
+    N, D = norm_x.shape
+    
+#      #step9
+#     dbeta = np.sum(dout, axis=0)
+#     dgammax = dout #not necessary, but more understandable
+
+#     #step8
+#     dgamma = np.sum(dgammax*xhat, axis=0)
+#     dxhat = dgammax * gamma
+
+#     #step7
+#     divar = np.sum(dxhat*xmu, axis=0)
+#     dxmu1 = dxhat * ivar
+
+#     #step6
+#     dsqrtvar = -1. /(sqrtvar**2) * divar
+
+#     #step5
+#     dvar = 0.5 * 1. /np.sqrt(var+eps) * dsqrtvar
+
+#     #step4
+#     dsq = 1. /N * np.ones((N,D)) * dvar
+
+#     #step3
+#     dxmu2 = 2 * xmu * dsq
+
+#     #step2
+#     dx1 = (dxmu1 + dxmu2)
+#     dmu = -1 * np.sum(dxmu1+dxmu2, axis=0)
+
+#     #step1
+#     dx2 = 1. /N * np.ones((N,D)) * dmu
+
+#     #step0
+#     dx = dx1 + dx2
+
+    
+    # step9
+    dbeta = dout.sum(axis=0) # paper indicates this should be sum over dl/dy ==? dout
+    # dgamma = (dout.T.dot(x)).sum(axis=0) # paper indicates this should be sum over dl/dy ==? dout * normalized x
+    
+    # step8
+    dgamma = (dout*norm_x).sum(axis=0)
+    # have tried both orderings and summing dout in advance ... none of them seem to work
+    # is x (normalised x) the right value to be using here?
+    
+    dxhat = dout * gamma
+    
+    # step7
+    divar = np.sum(dxhat*x_centered, axis=0) # missed this
+    sqrtvar = np.sqrt(sample_var + eps)
+    dcentered_mean = dxhat / sqrtvar
+    
+    # step6
+    dsqrt_var = -1. /(sqrtvar**2) * divar # had these wrong way round
+    
+    # step5
+    dvar = 0.5 * 1. / np.sqrt(sample_var + eps) * dsqrt_var
+    
+    # step4
+    dx_centered_squared = 1. / N * np.ones((N, D)) * dvar
+    
+    # step3
+    dx_centered = 2 * x_centered * dx_centered_squared
+    
+    # step2
+    dx_1 = dx_centered + dcentered_mean
+    dmean = -1 * (dx_centered + dcentered_mean).sum(axis=0)
+    
+    # step1 
+    dx_2 = 1. / N * np.ones((N, D)) * dmean
+    
+    # step0
+    dx = dx_1 + dx_2
+    
+    
+    
+    # mul gate is a gradient switcher, multiplying the incoming gradient by the other input ...
+    
+#     #unfold the variables stored in cache
+#     xhat,gamma,xmu,ivar,sqrtvar,var,eps = cache['solution']
+
+#     #get the dimensions of the input/output
+#     N,D = dout.shape
+
+#     #step9
+#     dbeta = np.sum(dout, axis=0)
+#     dgammax = dout #not necessary, but more understandable
+
+#     #step8
+#     dgamma = np.sum(dgammax*xhat, axis=0)
+#     dxhat = dgammax * gamma
+    
+    
+#     import pdb; pdb.set_trace()
+    
+    
+#     size = dout.shape[0]
+#     d_norm = dout.dot(gamma)
+#     d_sample_var = (d_norm.dot((x - sample_mean)).T * -1./2. * np.power(sample_var,-3./2)).sum(axis=0)
+#     d_sample_mean =  (-1./np.sqrt(d_sample_var) * d_norm).sum(axis=0) + d_sample_var * (-2. * (x - sample_mean)).sum(axis=0) / size
+    
+#     dx = d_norm * 1./cache['sample_var'] + d_sample_mean * 2. * (cache['x'] - cache['sample_mean']) / size + d_sample_var / size
+#     dx = dout
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -309,7 +510,27 @@ def batchnorm_backward_alt(dout, cache):
     # should be able to compute gradients with respect to the inputs in a     #
     # single statement; our implementation fits on a single 80-character line.#
     ###########################################################################
-    pass
+    
+    norm_x = cache['norm_x']
+    N, D = norm_x.shape
+    sample_var = cache['sample_var']
+    sample_mean = cache['sample_mean']
+    x_centered = cache['x_centered']
+    eps = cache['eps'] 
+    inv_sqrt_var = 1./np.sqrt(sample_var + eps)
+    gamma = cache['gamma']
+    beta = cache['beta'] 
+    
+    
+    dbeta = dout.sum(axis=0)
+    dgamma = (dout*norm_x).sum(axis=0)
+    
+    dnorm_x = dout * gamma
+    dvar = (dnorm_x * x_centered * -1./2. * np.power(sample_var + eps,-3./2.)).sum(axis=0)
+    dmean = (-1. * dnorm_x * inv_sqrt_var).sum(axis=0) + dvar / N * (-2. * x_centered).sum(axis=0)
+    dx = dnorm_x * inv_sqrt_var + dvar * 2. * x_centered / N + dmean / N
+    
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################

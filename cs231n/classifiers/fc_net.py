@@ -190,6 +190,9 @@ class FullyConnectedNet(object):
 #             print(index, input_dim, output_dim)
             self.params[f'W{index}'] = np.random.normal(0.0, weight_scale, (input_dim, output_dim))
             self.params[f'b{index}'] = np.zeros(output_dim)
+            if self.normalization=='batchnorm':
+                self.params[f'beta{index}'] = np.ones(input_dim)
+                self.params[f'gamma{index}'] = np.zeros(input_dim)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -252,8 +255,11 @@ class FullyConnectedNet(object):
         caches = []
         
         for index in range(1,self.num_layers):
-            previous_layer_output, cache = affine_relu_forward(previous_layer_output, self.params[f'W{index}'], self.params[f'b{index}'])
+#             import pdb; pdb.set_trace()
+            previous_layer_output, cache = batchnorm_forward(previous_layer_output, self.params[f'gamma{index}'], self.params[f'beta{index}'], self.bn_params[index-1])
             caches.append(cache)
+            previous_layer_output, cache = affine_relu_forward(previous_layer_output, self.params[f'W{index}'], self.params[f'b{index}'])
+            caches.append(cache)           
             
         scores, affine_forward_cache = affine_forward(previous_layer_output, self.params[f'W{index+1}'], self.params[f'b{index+1}'])   
         
@@ -291,6 +297,7 @@ class FullyConnectedNet(object):
         
         for index in range(self.num_layers-1, 0,-1):
             higher_layer_out, grads[f'W{index}'], grads[f'b{index}'] = affine_relu_backward(higher_layer_out, caches[index-1])
+            higher_layer_out, grads[f'gamma{index}'], grads[f'beta{index}'] = batchnorm_backward(higher_layer_out, cache)
             grads[f'W{index}'] += self.reg * self.params[f'W{index}']
             loss += self.reg * 0.5 * (np.sum(self.params[f'W{index}']**2))
 
