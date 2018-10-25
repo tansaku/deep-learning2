@@ -190,9 +190,12 @@ class FullyConnectedNet(object):
 #             print(index, input_dim, output_dim)
             self.params[f'W{index}'] = np.random.normal(0.0, weight_scale, (input_dim, output_dim))
             self.params[f'b{index}'] = np.zeros(output_dim)
-            if self.normalization=='batchnorm':
-                self.params[f'beta{index}'] = np.ones(input_dim)
-                self.params[f'gamma{index}'] = np.zeros(input_dim)
+        
+        if self.normalization=='batchnorm':
+            for index, input_dim in enumerate(input_dims[:-1], 1):
+                print(index, input_dim)
+                self.params[f'beta{index}'] = np.zeros(input_dim)
+                self.params[f'gamma{index}'] = np.ones(input_dim)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -251,18 +254,24 @@ class FullyConnectedNet(object):
         # self.bn_params[1] to the forward pass for the second batch normalization #
         # layer, etc.                                                              #
         ############################################################################
-        previous_layer_output = X
+        previous_layer_output = X.reshape(*X.shape[:1], -1) # ensure we flatten higher dimensions
         caches = []
         
         for index in range(1,self.num_layers):
-#             import pdb; pdb.set_trace()
-            previous_layer_output, cache = batchnorm_forward(previous_layer_output, self.params[f'gamma{index}'], self.params[f'beta{index}'], self.bn_params[index-1])
-            caches.append(cache)
+            if self.normalization=='batchnorm':
+#                 print(index)
+                previous_layer_output, cache = batchnorm_forward(previous_layer_output, self.params[f'gamma{index}'], self.params[f'beta{index}'], self.bn_params[index-1])
+                caches.append(cache)
             previous_layer_output, cache = affine_relu_forward(previous_layer_output, self.params[f'W{index}'], self.params[f'b{index}'])
             caches.append(cache)           
             
-        scores, affine_forward_cache = affine_forward(previous_layer_output, self.params[f'W{index+1}'], self.params[f'b{index+1}'])   
+        scores, affine_forward_cache = affine_forward(previous_layer_output, self.params[f'W{index+1}'], self.params[f'b{index+1}'])  
         
+        #  batchnorm, affine, batchnorm, affine
+        # 0,1,2,3
+        #
+        # 2, 1, 0
+        # x2 4, 2, 0        
 #         first_layer_output, first_affine_relu_forward_cache = affine_relu_forward(X, self.params['W1'], self.params['b1'])
 #         second_layer_output, second_affine_relu_forward_cache = affine_relu_forward(first_layer_output, self.params['W2'], self.params['b2'])
 #         scores, affine_forward_cache = affine_forward(second_layer_output, self.params['W3'], self.params['b3'])
@@ -296,8 +305,15 @@ class FullyConnectedNet(object):
         loss += self.reg * 0.5 * (np.sum(self.params[f'W{self.num_layers}']**2))
         
         for index in range(self.num_layers-1, 0,-1):
-            higher_layer_out, grads[f'W{index}'], grads[f'b{index}'] = affine_relu_backward(higher_layer_out, caches[index-1])
-            higher_layer_out, grads[f'gamma{index}'], grads[f'beta{index}'] = batchnorm_backward(higher_layer_out, cache)
+#             import pdb; pdb.set_trace()
+#             print('index: ', index)
+            if self.normalization=='batchnorm':
+                cache_index = 2*index-1
+            else: 
+                cache_index = index-1
+            higher_layer_out, grads[f'W{index}'], grads[f'b{index}'] = affine_relu_backward(higher_layer_out, caches[cache_index])
+            if self.normalization=='batchnorm':
+                higher_layer_out, grads[f'gamma{index}'], grads[f'beta{index}'] = batchnorm_backward(higher_layer_out, caches[2*index-2])
             grads[f'W{index}'] += self.reg * self.params[f'W{index}']
             loss += self.reg * 0.5 * (np.sum(self.params[f'W{index}']**2))
 

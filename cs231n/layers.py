@@ -164,7 +164,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     mode = bn_param['mode']
     eps = bn_param.get('eps', 1e-5)
     momentum = bn_param.get('momentum', 0.9)
-
+#     import pdb; pdb.set_trace()
     N, D = x.shape
     running_mean = bn_param.get('running_mean', np.zeros(D, dtype=x.dtype))
     running_var = bn_param.get('running_var', np.zeros(D, dtype=x.dtype))
@@ -560,7 +560,7 @@ def layernorm_forward(x, gamma, beta, ln_param):
     - out: of shape (N, D)
     - cache: A tuple of values needed in the backward pass
     """
-    out, cache = None, None
+    out, cache = None, {}
     eps = ln_param.get('eps', 1e-5)
     ###########################################################################
     # TODO: Implement the training-time forward pass for layer norm.          #
@@ -572,7 +572,32 @@ def layernorm_forward(x, gamma, beta, ln_param):
     # transformations you could perform, that would enable you to copy over   #
     # the batch norm code and leave it almost unchanged?                      #
     ###########################################################################
-    pass
+    
+    cache['eps'] = eps
+    N, D = x.shape
+    
+    sample_mean = np.average(x,axis=0) 
+    sample_var = np.var(x,axis=0)
+
+    cache['sample_mean'] = sample_mean
+    cache['sample_var'] = sample_var
+    
+    cache['x'] = x
+
+    x_centered = x - sample_mean
+    cache['x_centered'] = x_centered
+    x_normalized = x_centered / np.sqrt(sample_var + eps)
+    cache['norm_x'] = x_normalized
+
+    out = gamma * x_normalized + beta # problem was using x here ...
+
+    cache['gamma'] = gamma
+    cache['beta'] = beta
+
+#     running_mean = momentum * running_mean + (1 - momentum) * sample_mean
+#     running_var = momentum * running_var + (1 - momentum) * sample_var
+        
+        
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
