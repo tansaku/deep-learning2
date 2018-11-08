@@ -576,17 +576,18 @@ def layernorm_forward(x, gamma, beta, ln_param):
     cache['eps'] = eps
     N, D = x.shape
     
-    sample_mean = np.average(x,axis=0) 
-    sample_var = np.var(x,axis=0)
+    sample_mean = np.average(x,axis=1) 
+    sample_var = np.var(x,axis=1)
 
     cache['sample_mean'] = sample_mean
     cache['sample_var'] = sample_var
     
     cache['x'] = x
 
-    x_centered = x - sample_mean
+#     import pdb; pdb.set_trace()
+    x_centered = (x.T - sample_mean).T
     cache['x_centered'] = x_centered
-    x_normalized = x_centered / np.sqrt(sample_var + eps)
+    x_normalized = (x_centered.T / np.sqrt(sample_var + eps)).T
     cache['norm_x'] = x_normalized
 
     out = gamma * x_normalized + beta # problem was using x here ...
@@ -628,7 +629,56 @@ def layernorm_backward(dout, cache):
     # implementation of batch normalization. The hints to the forward pass    #
     # still apply!                                                            #
     ###########################################################################
-    pass
+#     norm_x = cache['norm_x']
+#     gamma = cache['gamma']
+#     beta = cache['beta'] 
+#     eps = cache['eps'] 
+#     sample_mean = cache['sample_mean']
+#     sample_var = cache['sample_var']
+#     x_centered = cache['x_centered']
+    
+#     N, D = norm_x.shape
+    
+#     dbeta = dout.sum(axis=0)
+#     dgamma = (dout*norm_x).sum(axis=0)
+#     dxhat = dout * gamma
+#     divar = np.sum(dxhat*x_centered, axis=1) 
+#     sqrtvar = np.sqrt(sample_var + eps)
+#     dcentered_mean = dxhat.T / sqrtvar
+#     dsqrt_var = -1. /(sqrtvar**2) * divar 
+#     dvar = 0.5 * 1. / np.sqrt(sample_var + eps) * dsqrt_var
+# #     import pdb; pdb.set_trace()
+#     dx_centered_squared = (1. / N * np.ones((N, D)).T * dvar).T
+#     dx_centered = 2 * x_centered * dx_centered_squared
+#     dx_1 = dx_centered.T + dcentered_mean
+#     dmean = -1 * (dx_centered.T + dcentered_mean).sum(axis=0)
+#     dx_2 = (1. / N * np.ones((N, D)).T * dmean).T
+#     dx = (dx_1 + dx_2.T).T
+    
+    
+    norm_x = cache['norm_x']
+    N, D = norm_x.shape
+    sample_var = cache['sample_var']
+    sample_mean = cache['sample_mean']
+    x_centered = cache['x_centered']
+    eps = cache['eps'] 
+    inv_sqrt_var = 1./np.sqrt(sample_var + eps)
+    gamma = cache['gamma']
+    beta = cache['beta'] 
+    
+    
+    dbeta = dout.sum(axis=0)
+    dgamma = (dout*norm_x).sum(axis=0)
+    
+    dnorm_x = dout * gamma
+    # will need to re-do with writing out equations ...
+#     import pdb; pdb.set_trace()
+    dvar = ((dnorm_x * x_centered).T * -1./2. * np.power(sample_var + eps,-3./2.)).sum(axis=1)
+    dmean = (-1. * dnorm_x.T * inv_sqrt_var).sum(axis=1) + dvar / N * (-2. * x_centered).sum(axis=0)
+    dx = (dnorm_x.T * inv_sqrt_var).T + dvar * 2. * x_centered / N + dmean / N
+    
+    
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
